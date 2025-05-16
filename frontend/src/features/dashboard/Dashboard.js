@@ -23,7 +23,7 @@ const Dashboard = () => {
     let filtered = products;
 
     if (role === 'admin') {
-      filtered = products.filter((product) => product.admin === username);
+      filtered = products.filter((product) => product.createdBy === username);
     }
 
     setFilteredProducts(filtered);
@@ -37,7 +37,7 @@ const Dashboard = () => {
     let filtered = products;
 
     if (role === 'admin') {
-      filtered = products.filter((product) => product.admin === username);
+      filtered = products.filter((product) => product.createdBy === username);
     }
 
     if (searchTerm) {
