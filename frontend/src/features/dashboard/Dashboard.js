@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, deleteProduct } from '../../redux/slices/productSlice';
+import { logout } from '../../redux/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 import AddProduct from './AddProduct';
 import ProductCard from './ProductCard';
 import SearchFilter from './SearchFilter';
@@ -8,7 +10,9 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const products = useSelector((state) => state.products.list);
+  const { role, username } = useSelector((state) => state.auth);
   const [filteredProducts, setFilteredProducts] = useState(products);
 
   useEffect(() => {
@@ -16,8 +20,14 @@ const Dashboard = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    setFilteredProducts(products);
-  }, [products]);
+    let filtered = products;
+
+    if (role === 'admin') {
+      filtered = products.filter((product) => product.admin === username);
+    }
+
+    setFilteredProducts(filtered);
+  }, [products, role, username]);
 
   const handleDelete = (id) => {
     dispatch(deleteProduct(id));
@@ -25,6 +35,10 @@ const Dashboard = () => {
 
   const handleSearch = (searchTerm, minPrice, maxPrice) => {
     let filtered = products;
+
+    if (role === 'admin') {
+      filtered = products.filter((product) => product.admin === username);
+    }
 
     if (searchTerm) {
       filtered = filtered.filter((product) =>
@@ -44,9 +58,17 @@ const Dashboard = () => {
     setFilteredProducts(filtered);
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+
   return (
     <div className="dashboard-container">
-      <h2 className="dashboard-header">Admin Dashboard</h2>
+      <header className="dashboard-header">
+        <h2>Admin Dashboard</h2>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </header>
       <SearchFilter onSearch={handleSearch} />
       <AddProduct />
       <div className="product-list">

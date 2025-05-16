@@ -9,19 +9,22 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, token } = useSelector((state) => state.auth);
+  const { loading, error, token, role } = useSelector((state) => state.auth);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(login({ email, password }));
   };
 
-  // Redirect on successful login
   useEffect(() => {
     if (token) {
-      navigate('/dashboard');
+      if (role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/customer-home');
+      }
     }
-  }, [token, navigate]);
+  }, [token, role, navigate]);
 
   return (
     <div className="auth-container">

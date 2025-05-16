@@ -1,42 +1,51 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../api/axios';
 
-// Helper functions to handle token
-const setToken = (token) => {
-  localStorage.setItem('token', token);
-};
-
 const removeToken = () => {
   localStorage.removeItem('token');
+  localStorage.removeItem('username');
+  localStorage.removeItem('role');
 };
 
-// Async action for login
-export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
-  try {
-    const response = await axios.post('/users/login', credentials);
-    setToken(response.data.token);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Login failed');
+export const login = createAsyncThunk(
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('/users/login', credentials);
+      const { token, username, role } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('username', username);
+      localStorage.setItem('role', role);
+      return { token, username, role };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
   }
-});
+);
 
-export const signup = createAsyncThunk('auth/signup', async (userData, { rejectWithValue }) => {
-  try {
-    const response = await axios.post('/users/signup', userData);
-    localStorage.setItem('token', response.data.token);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Signup failed');
+export const signup = createAsyncThunk(
+  'auth/signup',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('/users/signup', userData);
+      const { token, username, role } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('username', username);
+      localStorage.setItem('role', role);
+      return { token, username, role };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Signup failed');
+    }
   }
-});
-
+);
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
     token: localStorage.getItem('token') || null,
+    username: localStorage.getItem('username') || null,
+    role: localStorage.getItem('role') || null,
     loading: false,
     error: null,
   },
@@ -44,13 +53,19 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.username = null;
+      state.role = null;
       removeToken();
-      window.location.href = '/login'; // Redirect on logout
+      window.location.href = '/login';
     },
     checkAuth: (state) => {
       const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      const role = localStorage.getItem('role');
       if (token) {
         state.token = token;
+        state.username = username;
+        state.role = role;
       }
     },
   },
@@ -66,19 +81,19 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
         state.token = action.payload.token;
-        localStorage.setItem('token', action.payload.token);  // Store token
+        state.username = action.payload.username;
+        state.role = action.payload.role;
       })
-
       .addCase(signup.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
         state.token = action.payload.token;
+        state.username = action.payload.username;
+        state.role = action.payload.role;
       })
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;

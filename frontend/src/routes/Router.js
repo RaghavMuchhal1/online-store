@@ -3,13 +3,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from '../features/auth/Login';
 import Signup from '../features/auth/Signup';
 import Dashboard from '../features/dashboard/Dashboard';
-import ProductList from '../features/products/ProductList';
 import ProtectedRoute from '../components/ProtectedRoute';
+import CustomerDashboard from '../features/dashboard/CustomerDashboard';
 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route
@@ -21,10 +22,10 @@ const AppRouter = () => {
           }
         />
         <Route
-          path="/"
+          path="/customer-home"
           element={
-            <ProtectedRoute>
-              <ProductList />
+            <ProtectedRoute role="customer">
+              <CustomerDashboard/>
             </ProtectedRoute>
           }
         />
@@ -32,5 +33,7 @@ const AppRouter = () => {
     </Router>
   );
 };
+
+
 
 export default AppRouter;

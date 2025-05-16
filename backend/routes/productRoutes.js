@@ -3,7 +3,6 @@ const { authenticateToken, authorizeRole } = require('../middleware/authMiddlewa
 const Product = require('../models/Product');
 const router = express.Router();
 
-// Create a new product (Admin only)
 router.post('/', authenticateToken, authorizeRole('admin'), async (req, res) => {
     const { name, description, price } = req.body;
 
@@ -20,7 +19,6 @@ router.post('/', authenticateToken, authorizeRole('admin'), async (req, res) => 
     }
 });
 
-// Get all products (Public)
 router.get('/', async (req, res) => {
     try {
         const products = await Product.findAll();
@@ -30,7 +28,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Delete a product (Admin only)
 router.delete('/:id', authenticateToken, authorizeRole('admin'), async (req, res) => {
     const { id } = req.params;
 
@@ -43,7 +40,6 @@ router.delete('/:id', authenticateToken, authorizeRole('admin'), async (req, res
         res.status(500).json({ message: 'Error deleting product', error: err.message });
     }
 });
-// Update a product (Admin only)
 router.put('/:id', authenticateToken, authorizeRole('admin'), async (req, res) => {
     const { id } = req.params;
     const { name, description, price } = req.body;
@@ -64,7 +60,6 @@ router.put('/:id', authenticateToken, authorizeRole('admin'), async (req, res) =
         res.status(500).json({ message: 'Error updating product', error: err.message });
     }
 });
-// Filter products by admin username
 router.get('/filter/:username', async (req, res) => {
     const { username } = req.params;
 
