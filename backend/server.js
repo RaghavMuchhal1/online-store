@@ -1,13 +1,28 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const sequelize = require('./config/database');
+const User = require('./models/User');
+const Product = require('./models/Product');
+
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5500;
+
 app.use(cors());
 app.use(express.json());
+
 app.get('/', (req, res) => {
-  res.json({ message: 'API is running' });
+    res.status(200).json({ message: 'API is running' });
 });
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });
+
+sequelize.sync({ force: false }) 
+  .then(() => {
+    console.log('Database & tables created!');
+  })
+  .catch((err) => {
+    console.error('Error syncing database:', err);
+  });
