@@ -167,9 +167,7 @@ online-store/
 ---
 
 ## 🎥 Loom Video Demo
-
-Click [here](https://loom.com/share/your-video-link) to view the demo of the application.
-
+https://www.loom.com/share/b80551c9efdb4c9ba4a4931674a739d5?sid=dc51b2d7-efe6-481f-969c-94516a97d034
 ---
 
 ## 🤝 Contributing
