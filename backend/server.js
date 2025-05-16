@@ -2,9 +2,9 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const sequelize = require('./config/database');
-const User = require('./models/User');
-const Product = require('./models/Product');
 const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
+const { swaggerUi, swaggerDocs } = require('./swagger/swaggerConfig');
 
 const app = express();
 const PORT = process.env.PORT || 5500;
@@ -12,13 +12,21 @@ const PORT = process.env.PORT || 5500;
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'API is running' });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
 
 sequelize.sync({ force: false })
     .then(() => {
@@ -28,11 +36,4 @@ sequelize.sync({ force: false })
         console.error('Error syncing database:', err);
     });
 
-
-app.use('/api/users', userRoutes);
-
-sequelize.sync().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
-});
+module.exports = app;
