@@ -1,16 +1,18 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 
+// Hash the password
 const hashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
 };
 
-const comparePassword = async (password, hash) => {
-  return await bcrypt.compare(password, hash);
+// Compare plain password with hashed password
+const comparePassword = async (inputPassword, hashedPassword) => {
+  return await bcrypt.compare(inputPassword, hashedPassword);
 };
 
+// Generate JWT token
 const generateToken = (user) => {
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role },
@@ -19,4 +21,8 @@ const generateToken = (user) => {
   );
 };
 
-module.exports = { hashPassword, comparePassword, generateToken };
+module.exports = {
+  hashPassword,
+  comparePassword,
+  generateToken,
+};
