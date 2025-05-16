@@ -1,18 +1,31 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
-import { logout } from '../../redux/slices/authSlice';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts, deleteProduct } from '../../redux/slices/productSlice';
+import AddProduct from './AddProduct';
+import ProductCard from './ProductCard';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const products = useSelector((state) => state.products.list);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
+
+  const handleDelete = (id) => {
+    dispatch(deleteProduct(id));
   };
 
   return (
-    <div>
-      <h2>Admin Dashboard</h2>
-      <button onClick={handleLogout}>Logout</button>
+    <div className="dashboard-container">
+      <h2 className="dashboard-header">Admin Dashboard</h2>
+      <AddProduct />
+      <div className="product-list">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} onDelete={handleDelete} />
+        ))}
+      </div>
     </div>
   );
 };
