@@ -1,42 +1,58 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../api/axios';
+import { jwtDecode } from "jwt-decode";
+import { toast } from 'react-toastify';
 
-// Helper functions to handle token
-const setToken = (token) => {
-  localStorage.setItem('token', token);
-};
-
-const removeToken = () => {
-  localStorage.removeItem('token');
-};
-
-// Async action for login
-export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
-  try {
-    const response = await axios.post('/users/login', credentials);
-    setToken(response.data.token);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Login failed');
+// Login user
+export const login = createAsyncThunk(
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('/users/login', credentials);
+      const token = response.data.token;
+      const decoded = jwtDecode(token);
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', decoded.role);
+      toast.success('Login successful');
+      return { user: decoded, token };
+    } catch (error) {
+      toast.error('Login failed');
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
   }
-});
+);
 
-export const signup = createAsyncThunk('auth/signup', async (userData, { rejectWithValue }) => {
-  try {
-    const response = await axios.post('/users/signup', userData);
-    localStorage.setItem('token', response.data.token);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'Signup failed');
+// Signup user
+export const signup = createAsyncThunk(
+  'auth/signup',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post('/users/signup', userData);
+      const token = response.data.token;
+      const decoded = jwtDecode(token);
+
+      // Store token and role in localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', decoded.role);
+      toast.success('Signup successful');
+      return { user: decoded, token };
+    } catch (error) {
+      toast.error('Signup failed');
+      return rejectWithValue(error.response?.data?.message || 'Signup failed');
+    }
   }
-});
+);
 
+// Check authentication status from local storage
+const token = localStorage.getItem('token');
+const role = localStorage.getItem('role');
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
-    token: localStorage.getItem('token') || null,
+    token: token || null,
+    role: role || null,
     loading: false,
     error: null,
   },
@@ -44,14 +60,10 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
-      removeToken();
-      window.location.href = '/login'; // Redirect on logout
-    },
-    checkAuth: (state) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        state.token = token;
-      }
+      state.role = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      toast.success('Logged out successfully');
     },
   },
   extraReducers: (builder) => {
@@ -60,17 +72,16 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        localStorage.setItem('token', action.payload.token);  // Store token
+        state.role = action.payload.user.role;
       })
-
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(signup.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -79,6 +90,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        state.role = action.payload.user.role;
       })
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;
@@ -87,5 +99,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, checkAuth } = authSlice.actions;
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

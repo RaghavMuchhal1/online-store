@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5500/api',
+const instance = axios.create({
+  baseURL: 'http://localhost:5500/api',
 });
 
-api.interceptors.request.use((config) => {
+instance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -12,4 +12,4 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export default api;
+export default instance;

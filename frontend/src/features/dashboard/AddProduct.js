@@ -14,7 +14,7 @@ const AddProduct = () => {
       setName('');
       setDescription('');
       setPrice('');
-      dispatch(fetchProducts()); 
+      dispatch(fetchProducts({ page: 1, limit: 5 }));  // Fetch the first page after adding
     }
   };
 

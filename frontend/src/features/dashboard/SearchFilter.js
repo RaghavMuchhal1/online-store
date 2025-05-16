@@ -1,37 +1,45 @@
 import React, { useState } from 'react';
 
 const SearchFilter = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
 
-  const handleSearch = () => {
-    onSearch(searchTerm, minPrice, maxPrice);
-  };
+    const handleSearch = () => {
+        onSearch(searchTerm, minPrice, maxPrice);
+    };
+    const handleReset = () => {
+        setSearchTerm('');
+        setMinPrice('');
+        setMaxPrice('');
+        onSearch('', '', '');
+    };
 
-  return (
-    <div className="search-filter">
-      <input
-        type="text"
-        placeholder="Search by name or description"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Min Price"
-        value={minPrice}
-        onChange={(e) => setMinPrice(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Max Price"
-        value={maxPrice}
-        onChange={(e) => setMaxPrice(e.target.value)}
-      />
-      <button onClick={handleSearch}>Search</button>
-    </div>
-  );
+
+    return (
+        <div className="search-filter">
+            <input
+                type="text"
+                placeholder="Search by name or description"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <input
+                type="number"
+                placeholder="Min Price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+            />
+            <input
+                type="number"
+                placeholder="Max Price"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+            />
+            <button onClick={handleSearch}>Search</button>
+            <button onClick={handleReset}>Reset</button>
+        </div>
+    );
 };
 
 export default SearchFilter;
