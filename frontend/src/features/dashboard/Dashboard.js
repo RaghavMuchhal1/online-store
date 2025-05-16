@@ -1,52 +1,57 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts, deleteProduct, setPage } from '../../redux/slices/productSlice';
+import { fetchProducts, deleteProduct } from '../../redux/slices/productSlice';
 import AddProduct from './AddProduct';
 import ProductCard from './ProductCard';
 import SearchFilter from './SearchFilter';
-import Header from '../../components/Header';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { list: products, currentPage, totalPages } = useSelector((state) => state.products);
+  const products = useSelector((state) => state.products.list);
+  const [filteredProducts, setFilteredProducts] = useState(products);
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
+
   const handleDelete = (id) => {
     dispatch(deleteProduct(id));
   };
 
-  const handlePageChange = (page) => {
-    dispatch(setPage(page));
+  const handleSearch = (searchTerm, minPrice, maxPrice) => {
+    let filtered = products;
+
+    if (searchTerm) {
+      filtered = filtered.filter((product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (minPrice) {
+      filtered = filtered.filter((product) => product.price >= parseFloat(minPrice));
+    }
+
+    if (maxPrice) {
+      filtered = filtered.filter((product) => product.price <= parseFloat(maxPrice));
+    }
+
+    setFilteredProducts(filtered);
   };
 
   return (
     <div className="dashboard-container">
-      <Header />
       <h2 className="dashboard-header">Admin Dashboard</h2>
-      <SearchFilter />
+      <SearchFilter onSearch={handleSearch} />
       <AddProduct />
       <div className="product-list">
-        {products.length > 0 ? (
-          products.map((product) => (
-            <ProductCard key={product.id} product={product} onDelete={handleDelete} />
-          ))
-        ) : (
-          <p>No products available</p>
-        )}
-      </div>
-      <div className="pagination">
-        {Array.from({ length: totalPages }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handlePageChange(index + 1)}
-            className={currentPage === index + 1 ? 'active' : ''}
-          >
-            {index + 1}
-          </button>
+        {filteredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} onDelete={handleDelete} />
         ))}
       </div>
     </div>
